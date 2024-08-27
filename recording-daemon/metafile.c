@@ -81,6 +81,7 @@ static void meta_destroy(metafile_t *mf) {
 	}
 	db_close_call(mf);
 	output_close(mf, mf->mix_out, NULL, mf->discard);
+	mf->mix_out = NULL;
 }
 
 
