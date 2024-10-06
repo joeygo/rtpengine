@@ -1490,6 +1490,7 @@ static const char *kernelize_one(struct rtpengine_target_info *reti, GQueue *out
 
 	if (proto_is_rtp(media->protocol)) {
 		reti->rtp = 1;
+		reti->ssrc_req = 1;
 		if (!ML_ISSET(media->monologue, TRANSCODING)) {
 			reti->rtcp_fw = 1;
 			if (media->protocol->avpf)
@@ -2132,6 +2133,11 @@ static int media_demux_protocols(struct packet_handler_ctx *phc) {
 
 		mutex_lock(&phc->mp.stream->in_lock);
 		int ret = dtls(phc->mp.sfd, &phc->s, &phc->mp.fsin);
+		if (ret == 1) {
+			phc->unkernelize = "DTLS connected";
+			phc->unkernelize_subscriptions = true;
+			ret = 0;
+		}
 		mutex_unlock(&phc->mp.stream->in_lock);
 		if (!ret)
 			return 0;

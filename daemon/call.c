@@ -420,7 +420,7 @@ void kill_calls_timer(GSList *list, const char *url) {
 
 		if (url_prefix) {
 			snprintf(url_buf, sizeof(url_buf), "%s%s%s",
-					url_prefix, sockaddr_print_buf(cb_addr),
+					url_prefix, sockaddr_print_p_buf(cb_addr),
 					url_suffix);
 		}
 		else
@@ -1039,8 +1039,10 @@ enum call_stream_state call_stream_state_machine(struct packet_stream *ps) {
 		mutex_lock(&ps->in_lock);
 		struct dtls_connection *d = dtls_ptr(ps->selected_sfd);
 		if (d && d->init && !d->connected) {
-			dtls(ps->selected_sfd, NULL, NULL);
+			int dret = dtls(ps->selected_sfd, NULL, NULL);
 			mutex_unlock(&ps->in_lock);
+			if (dret == 1)
+				call_media_unkernelize(media, "DTLS connected");
 			return CSS_DTLS;
 		}
 		mutex_unlock(&ps->in_lock);
